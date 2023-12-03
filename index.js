@@ -31,7 +31,12 @@ app.get('/api/persons', (req, res, next) => {
 })
 
 app.get('/info', (req, res, next) => {
-  res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+  Person.find({}).then(persons => {
+    res.send(
+      `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
+    )
+  })
+  .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -79,6 +84,29 @@ app.post('/api/persons', (req, res, next) => {
   })
   .catch(error => next(error))
 })
+
+app.put("/api/persons/:id", (req, res, next) => {
+  const body = req.body;
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      res.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ 
+    error: 'unknown endpoint' 
+  })
+}
+
+app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
