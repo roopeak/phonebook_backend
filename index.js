@@ -22,32 +22,7 @@ app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :data')
 )
 
-// MONGOOSE STARTS
-
-// MONGOOSE ENDS
-
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456"
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523"
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345"
-  },
-  {
-    id: 4,
-    name: "Mary Poppendic",
-    number: "39-23-6423122"
-  }
-]
+let persons = []
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
@@ -84,35 +59,15 @@ const generateId = () => {
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  if (!body.number && !body.name) {
-    return response.status(400).json({
-      error: 'name and number is missing'
-    })
-  } else if (!body.number) {
-    return response.status(400).json({
-      error: 'number is missing'
-    })
-  } else if (!body.name) {
-    return response.status(400).json({
-      error: 'name is missing'
-    })
-  } 
-
-  if (persons.find(person => person.name === body.name)) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
-
-  const person = {
+  const person = new Person({
     id: generateId(),
     name: body.name,
-    number: body.number,
-  }
+    number: body.number
+  })
 
-  persons = persons.concat(person)
-
-  response.json(person)
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
 const PORT = process.env.PORT
