@@ -9,7 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
-app.use(requestLogger)
 
 morgan.token('data', (request, response) => {
   if (request.method === 'POST') {
@@ -36,7 +35,7 @@ app.get('/info', (request, response) => {
   response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
   .then(person => {
     if (person) {
@@ -60,7 +59,22 @@ const generateId = () => {
   return Math.floor(Math.random() * 100)
 }
 
-app.post('/api/persons', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+  
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: body.number})
+    .then(updatedPerson => {
+      response.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
+
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
   
   const person = new Person({
