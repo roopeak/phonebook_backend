@@ -23,16 +23,19 @@ app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :data')
 )
 
-let persons = []
-
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
     response.json(persons)
   })
 })
 
-app.get('/info', (request, response) => {
-  response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+app.get('/info', (request, response, next) => {
+  Person.find({}).then(persons => {
+    response.send(
+      `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
+    )
+  })
+  .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
