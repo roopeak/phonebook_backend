@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
 
-morgan.token('data', (request, response) => {
+morgan.token('data', (request) => {
   if (request.method === 'POST') {
     return JSON.stringify(request.body)
   }
@@ -35,27 +35,27 @@ app.get('/info', (request, response, next) => {
       `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
     )
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
-  .then(person => {
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
-  })
-  .catch(error => next(error))
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-  .then(result => {
-    response.status(204).end()
-  })
-  .catch(error => next(error))
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 const generateId = () => {
@@ -64,13 +64,13 @@ const generateId = () => {
 
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
-  
+
   const person = {
     name: body.name,
     number: body.number
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: body.number})
+  Person.findByIdAndUpdate(request.params.id, person, { new: body.number })
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
@@ -79,13 +79,13 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
+
   const person = new Person({
     id: generateId(),
     name: body.name,
     number: body.number
   })
-  
+
   person.save()
     .then(savedPerson => {
       response.json(savedPerson)
